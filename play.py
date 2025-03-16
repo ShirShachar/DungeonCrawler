@@ -1,5 +1,6 @@
 import random
 import time
+from dungeon import Dungeon, Room
 
 
 class Player:
@@ -9,40 +10,48 @@ class Player:
         self.y = 1
         self.health = 100
         self.attack = 10
-        self.symbol = '(:'
+        self.symbol = '$'
 
 
-class Room:
-    def __init__(self, w, h):
-        self.width = w
-        self.height = h
-        # create the outline of the
-        # '#' for wall, '.' for floor
-        self.map = [['#' for _ in range(w)] for _ in range(h)]
-        for y in range(1, h - 1):
-            for x in range(1, w-1):
-                self.map[y][x] = '.'
+# class Room:
+#     def __init__(self, w, h):
+#         self.width = w
+#         self.height = h
+#         # create the outline of the
+#         # '#' for wall, '.' for floor
+#         self.map = [['#' for _ in range(w)] for _ in range(h)]
+#         for y in range(1, h - 1):
+#             for x in range(1, w-1):
+#                 self.map[y][x] = '.'
 
 
 class Game:
     def __init__(self):
         # create the room and the player
-        self.room = Room(20, 10)
+        self.dungeon = Dungeon(60, 30, max_rooms=5)
         self.player = Player()
-        # set the flad to true to see the game loop
+
+        # Place player in the first room
+        if self.dungeon.rooms:
+            starting_room = self.dungeon.rooms[0]
+            center_x, center_y = starting_room.center()
+            self.player.x = center_x
+            self.player.y = center_y
+
         self.is_running = True
-        print("\033[H\033[J", end="")
+        # print("\033[H\033[J", end="")
 
     def display(self):
         # \033[H moves the cursor to the top-left position and
         # \033[J clears the screen from the cursor position to the end
 
-        for y in range(self.room.height):
-            for x in range(self.room.width):
+        print("\033[H\033[J", end="")
+        for y in range(self.dungeon.height):
+            for x in range(self.dungeon.width):
                 if x == self.player.x and y == self.player.y:
-                    print(self.player.symbol, end="")
+                    print(self.player.symbol, end='')
                 else:
-                    print(self.room.map[y][x], end="")
+                    print(self.dungeon.map[y][x], end='')
             print()
 
         print(f"Your Health: {self.player.health}")
@@ -66,7 +75,7 @@ class Game:
         new_x = self.player.x + m_x
         new_y = self.player.y + m_y
 
-        if self.room.map[new_y][new_x] != '#':
+        if self.dungeon.map[new_y][new_x] != '#':
             self.player.x = new_x
             self.player.y = new_y
 
