@@ -7,7 +7,7 @@ class Room:
         self.x = x  # this is x for the top left corner position
         self.y = y  # this is y for the top left corner position
         self.width = w
-        self.height = y
+        self.height = h
         self.is_connected = False  # is the room connected to anothe one
 
     def intersects(self, other_room, padding=1):
