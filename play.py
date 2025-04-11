@@ -64,7 +64,6 @@ class Game:
         display_map = [row[:] for row in self.dungeon.map]
 
         # Add enemies
-
         for enemy in self.enemies:
             display_map[enemy.y][enemy.x] = enemy.symbol
 
@@ -73,19 +72,47 @@ class Game:
                 if x == self.player.x and y == self.player.y:
                     print(self.player.symbol, end='')
                 else:
-                    print(self.dungeon.map[y][x], end='')
+                    print(display_map[y][x], end='')
             print()
 
         print(f"Your Health: {self.player.health}")
         print(f"Enemies remaining: {len(self.enemies)}")
 
     def enemies_move(self):
+        occupied = {(e.x, e.y) for e in self.enemies if e.health > 0}
+        occupied.add((self.player.x, self.player.y))
+
+        # Create a copy of the enemy list to avoid modification issues
+        for e in list(self.enemies):
+            pos = (e.x, e.y)
+            if pos in occupied:
+                occupied.remove(pos)
+
+            # If enemy is adjacent to player, attack
+            if abs(e.x - self.player.x) + abs(e.y - self.player.y) == 1:
+                print(f"{e.name} attacks you for {e.attck} damage!")
+                self.player.health -= e.attck
+            else:
+                e.move_towards(self.player.x, self.player.y,
+                               self.dungeon.map, occupied)
+
+            occupied.add((e.x, e.y))  # re-add their new position
+
+    def attack_enemy(self):
         for e in self.enemies:
-            e.move_towards(self.player.x, self.player.y, self.dungeon.map)
+            if abs(e.x - self.player.x) + abs(e.y - self.player.y) == 1:
+                print(f"You hit {e.name} for {self.player.attack} damage!")
+                e.health -= self.player.attack
+                if e.health <= 0:
+                    print(f"You defeated {e.name}!")
+                    self.enemies.remove(e)
+                break
+        else:
+            print("No enemy nearby to attack.")
 
     def input(self):
         move = input(
-            "Move: w - up, s - down, a - left, d - right. q - for quit\n").lower()
+            "Move: w - up, s - down, a - left, d - right. f - attack. q - quit\n").lower()
         m_x, m_y = 0, 0
 
         if move == 'w':
@@ -96,8 +123,12 @@ class Game:
             m_x = -1
         elif move == 'd':
             m_x = 1
+        elif move == 'f':
+            self.attack_enemy()
+            return
         elif move == 'q':
             self.is_running = False
+            return
 
         new_x = self.player.x + m_x
         new_y = self.player.y + m_y
@@ -110,9 +141,24 @@ class Game:
             self.enemies_move()
 
     def run(self):
-        while self.is_running:
+        while self.is_running and self.player.health > 0 and len(self.enemies) > 0:
             self.display()
             self.input()
+
+        self.display()
+
+        if self.player.health <= 0:
+            print("\nGame Over! You died 💀")
+        elif len(self.enemies) == 0:
+            print("\n🎉 You defeated all the enemies! You win!")
+            choice = input("Do you want to play again? (y/n): ").lower()
+            if choice == 'y':
+                self.__init__()
+                self.run()
+            else:
+                print("Thanks for playing!")
+        else:
+            print("You quit the game.")
 
 
 if __name__ == "__main__":

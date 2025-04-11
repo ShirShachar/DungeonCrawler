@@ -10,27 +10,26 @@ class Enemy:
         self.health = health
         self.attck = attack
 
-    def move_towards(self, target_x, target_y, dungeon_map):
-        d_x = 0
-        if self.x < target_x:
-            d_x = 1
-        elif self.x > target_x:
-            d_x = -1
+    def move_towards(self, target_x, target_y, dungeon_map, occupied_positions):
+        dx = target_x - self.x
+        dy = target_y - self.y
 
-        d_y = 0
-        if self.y < target_y:
-            d_y = 1
-        elif self.y > target_y:
-            d_y = -1
+        step_x = 1 if dx > 0 else -1 if dx < 0 else 0
+        step_y = 1 if dy > 0 else -1 if dy < 0 else 0
 
-        # random pick horizontal or vertical movement first
-            if random.choice([True, False]) and d_x != 0:
-                if dungeon_map[self.y][self.x + d_x] == '.':
-                    self.x += d_x
-                elif d_y != 0 and dungeon_map[self.y + d_y][self.x] == '.':
-                    self.y += d_y
-            else:
-                if d_y != 0 and dungeon_map[self.y + d_y][self.x] == '.':
-                    self.y += d_y
-                if d_x != 0 and dungeon_map[self.y][self.x + d_x] == '.':
-                    self.x += d_x
+        # Try horizontal move
+        new_x = self.x + step_x
+        new_y = self.y
+
+        if (new_x, new_y) not in occupied_positions and dungeon_map[new_y][new_x] == '.':
+            self.x = new_x
+            self.y = new_y
+            return
+
+        # Try vertical move
+        new_x = self.x
+        new_y = self.y + step_y
+
+        if (new_x, new_y) not in occupied_positions and dungeon_map[new_y][new_x] == '.':
+            self.x = new_x
+            self.y = new_y

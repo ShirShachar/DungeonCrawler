@@ -18,8 +18,8 @@ class Room:
                 self.y + self.height + padding > other_room.y)
 
     def center(self):
-        center_x = int(self.x + self.width / 2)
-        center_y = int(self.y + self.height / 2)
+        center_x = int(self.x + self.width // 2)
+        center_y = int(self.y + self.height // 2)
         return (center_x, center_y)
 
 
@@ -44,14 +44,17 @@ class Dungeon:
                     self.map[y][x] = '.'
 
     def generate(self):
-        for _ in range(self.max_rooms):
+        attempts = 0
+        while len(self.rooms) < self.max_rooms and attempts < self.max_rooms * 5:
+            attempts += 1
+
             # width and height of the room
             w = random.randint(self.room_min_size, self.room_max_size)
             h = random.randint(self.room_min_size, self.room_max_size)
 
-            # postion x and y - to make sure were not out of boundraies
-            x = random.randint(1, self.width - w - 1)
-            y = random.randint(1, self.height - h - 1)
+            # position x and y - make sure we’re not out of boundaries
+            x = random.randint(1, self.width - w - 2)
+            y = random.randint(1, self.height - h - 2)
 
             new_room = Room(x, y, w, h)
 
@@ -66,25 +69,19 @@ class Dungeon:
 
                 # Connect to the previous room
                 if len(self.rooms) > 0:
-                    # Center coordinates of new room and previous room
                     (new_x, new_y) = new_room.center()
                     (prev_x, prev_y) = self.rooms[-1].center()
 
-                    # Connect with horizontal and vertical tunnels
                     if random.randint(0, 1) == 1:
-                        # First horizontal, then vertical
                         self.create_h_tunnel(prev_x, new_x, prev_y)
                         self.create_v_tunnel(prev_y, new_y, new_x)
                     else:
-                        # First vertical, then horizontal
                         self.create_v_tunnel(prev_y, new_y, prev_x)
                         self.create_h_tunnel(prev_x, new_x, new_y)
 
-                    # Mark the room as connected
                     new_room.connected = True
                     self.rooms[-1].connected = True
 
-                # Add the new room to the list
                 self.rooms.append(new_room)
 
     def create_h_tunnel(self, x1, x2, y):
