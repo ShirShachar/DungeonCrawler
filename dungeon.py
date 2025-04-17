@@ -45,44 +45,51 @@ class Dungeon:
 
     def generate(self):
         attempts = 0
+
         while len(self.rooms) < self.max_rooms and attempts < self.max_rooms * 5:
             attempts += 1
 
-            # width and height of the room
+            # Room size with limits
             w = random.randint(self.room_min_size, self.room_max_size)
             h = random.randint(self.room_min_size, self.room_max_size)
 
-            # position x and y - make sure we’re not out of boundaries
+            # Avoid weird skinny rooms
+            if h > w * 2:
+                h = w
+            if w > h * 2:
+                w = h
+
+            # Position inside map bounds (leave 1 tile buffer)
             x = random.randint(1, self.width - w - 2)
             y = random.randint(1, self.height - h - 2)
 
             new_room = Room(x, y, w, h)
 
-            failed_to_make_room = False
-            for other_room in self.rooms:
-                if new_room.intersects(other_room):
-                    failed_to_make_room = True
-                    break
+            # Skip if overlapping
+            if any(new_room.intersects(other) for other in self.rooms):
+                continue
 
-            if not failed_to_make_room:
-                self.create_room(new_room)
+            # Carve the room
+            self.create_room(new_room)
 
-                # Connect to the previous room
-                if len(self.rooms) > 0:
-                    (new_x, new_y) = new_room.center()
-                    (prev_x, prev_y) = self.rooms[-1].center()
+            # Connect to previous room
+            if self.rooms:
+                new_x, new_y = new_room.center()
+                prev_x, prev_y = self.rooms[-1].center()
 
-                    if random.randint(0, 1) == 1:
-                        self.create_h_tunnel(prev_x, new_x, prev_y)
-                        self.create_v_tunnel(prev_y, new_y, new_x)
-                    else:
-                        self.create_v_tunnel(prev_y, new_y, prev_x)
-                        self.create_h_tunnel(prev_x, new_x, new_y)
+                if random.randint(0, 1):
+                    self.create_h_tunnel(prev_x, new_x, prev_y)
+                    self.create_v_tunnel(prev_y, new_y, new_x)
+                else:
+                    self.create_v_tunnel(prev_y, new_y, prev_x)
+                    self.create_h_tunnel(prev_x, new_x, new_y)
 
-                    new_room.connected = True
-                    self.rooms[-1].connected = True
+                new_room.is_connected = True
+                self.rooms[-1].is_connected = True
 
-                self.rooms.append(new_room)
+            self.rooms.append(new_room)
+
+            print(f"Generated {len(self.rooms)} rooms.")
 
     def create_h_tunnel(self, x1, x2, y):
         # Create a horizontal tunnel

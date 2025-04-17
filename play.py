@@ -2,6 +2,7 @@ import random
 import time
 from entities import Enemy
 from dungeon import Dungeon, Room
+from items import Item
 
 
 class Player:
@@ -19,6 +20,10 @@ class Game:
         # create the room and the player
         self.dungeon = Dungeon(60, 30, max_rooms=5)
         self.player = Player()
+        # for health
+        self.items = []
+        self.inventory = []
+        self.populate_items()
 
         # Place player in the first room
         if self.dungeon.rooms:
@@ -33,24 +38,39 @@ class Game:
         self.is_running = True
         # print("\033[H\033[J", end="")
 
+    def populate_items(self):
+        for room in self.dungeon.rooms[1:]:
+            if random.random() < 0.5:  # 50% chance
+                x = random.randint(room.x + 1, room.x + room.width - 2)
+                y = random.randint(room.y + 1, room.y + room.height - 2)
+                if self.dungeon.map[y][x] == '.':
+                    self.items.append(Item(x, y))
+
     def populate_enemies(self):
-        # enemies in random room, but skip the first
+        # Define enemy types
+        enemy_types = [
+            {'name': 'Goblin', 'symbol': 'G', 'health': 15, 'attack': 3},
+            {'name': 'Orc', 'symbol': 'O', 'health': 30, 'attack': 7},
+            {'name': 'Slime', 'symbol': 'S', 'health': 10, 'attack': 2}
+        ]
+
+        # Place enemies in rooms (skip first room)
         if len(self.dungeon.rooms) > 1:
             for room in self.dungeon.rooms[1:]:
-                # 1 to 3 enemies per room
                 n_enemies = random.randint(1, 3)
                 for _ in range(n_enemies):
                     x = random.randint(room.x + 1, room.x + room.width - 2)
-                    y = random.randint(
-                        room.y + 1, room.y + room.height - 2)
+                    y = random.randint(room.y + 1, room.y + room.height - 2)
 
-                # while not floor or occupied
                     if 0 <= x < self.dungeon.width and 0 <= y < self.dungeon.height:
                         if self.dungeon.map[y][x] == '.':
-                            self.enemies.append(Enemy(x, y))
+                            et = random.choice(enemy_types)
+                            self.enemies.append(
+                                Enemy(x, y, et['symbol'], et['name'],
+                                      et['health'], et['attack'])
+                            )
                             print(
                                 f"Room: x={room.x}, y={room.y}, width={room.width}, height={room.height}")
-
                             print(
                                 f"Map dimensions: {self.dungeon.width}x{self.dungeon.height}")
                             print(f"Trying to place enemy at: x={x}, y={y}")
@@ -74,6 +94,9 @@ class Game:
                 else:
                     print(display_map[y][x], end='')
             print()
+
+        for item in self.items:
+            display_map[item.y][item.x] = item.symbol
 
         print(f"Your Health: {self.player.health}")
         print(f"Enemies remaining: {len(self.enemies)}")
@@ -126,6 +149,16 @@ class Game:
         elif move == 'f':
             self.attack_enemy()
             return
+        elif move == 'u':
+            for item in self.inventory:
+                if item.effect == 'heal':
+                    self.player.health = min(
+                        100, self.player.health + item.value)
+                    print(f"You used a {item.name}! Healed {item.value} HP.")
+                    self.inventory.remove(item)
+                    break
+            else:
+                print("You have no health potions!")
         elif move == 'q':
             self.is_running = False
             return
