@@ -27,4 +27,6 @@ If there are any hardware, software, or online services you think you are going 
 
 
 ## Milestones 
-Not required for the initial proposal. Complete this section for the revised proposal.
+Milestone 1 - initial code, making sure it is working in the terminal (play.py)
+Milestone 2 - adding a pygame file
+Milestone 3 - adding features
