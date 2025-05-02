@@ -16,9 +16,27 @@ class Player:
 
 
 class Game:
-    def __init__(self):
-        # create the room and the player
-        self.dungeon = Dungeon(60, 30, max_rooms=5)
+    def __init__(self, level=1):
+        self.level = level
+        # Level-specific settings
+        if level == 1:
+            width, height = 40, 30
+            self.enemy_count = 3
+        elif level == 2:
+            width, height = 40, 30
+            self.enemy_count = 4
+        elif level == 3:
+            width, height = 60, 40
+            self.enemy_count = 5
+        elif level == 4:
+            width, height = 80, 50
+            self.enemy_count = 7
+        else:  # level 5
+            width, height = 80, 50
+            self.enemy_count = 8
+
+        # create the room and the player with level-specific size
+        self.dungeon = Dungeon(width, height, max_rooms=3 + level)
         self.player = Player()
         # for health
         self.items = []
@@ -39,12 +57,40 @@ class Game:
         # print("\033[H\033[J", end="")
 
     def populate_items(self):
-        for room in self.dungeon.rooms[1:]:
-            if random.random() < 0.5:  # 50% chance
+        # Base chance is 40%, increases slightly with level
+        base_chance = 0.4
+        spawn_chance = min(base_chance + (self.level - 1) * 0.1, 0.7)
+
+        # Minimum and maximum items per level
+        min_items = 1
+        max_items = self.level + 1
+
+        items_placed = 0
+        rooms = self.dungeon.rooms[1:]  # Skip first room
+        random.shuffle(rooms)  # Randomize room order
+
+        # Ensure at least one item is placed
+        for room in rooms:
+            if items_placed >= min_items:
+                break
+
+            x = random.randint(room.x + 1, room.x + room.width - 2)
+            y = random.randint(room.y + 1, room.y + room.height - 2)
+            if self.dungeon.map[y][x] == '.':
+                self.items.append(Item(x, y))
+                items_placed += 1
+
+        # Try to place additional items
+        for room in rooms:
+            if items_placed >= max_items:
+                break
+
+            if random.random() < spawn_chance:
                 x = random.randint(room.x + 1, room.x + room.width - 2)
                 y = random.randint(room.y + 1, room.y + room.height - 2)
                 if self.dungeon.map[y][x] == '.':
                     self.items.append(Item(x, y))
+                    items_placed += 1
 
     def populate_enemies(self):
         # Define enemy types
@@ -54,27 +100,37 @@ class Game:
             {'name': 'Slime', 'symbol': 'S', 'health': 10, 'attack': 2}
         ]
 
-        # Place enemies in rooms (skip first room)
+        # Place exactly enemy_count enemies in rooms (skip first room)
         if len(self.dungeon.rooms) > 1:
-            for room in self.dungeon.rooms[1:]:
-                n_enemies = random.randint(1, 3)
-                for _ in range(n_enemies):
-                    x = random.randint(room.x + 1, room.x + room.width - 2)
-                    y = random.randint(room.y + 1, room.y + room.height - 2)
+            enemies_placed = 0
+            max_attempts = 100  # Prevent infinite loop
+            attempts = 0
 
-                    if 0 <= x < self.dungeon.width and 0 <= y < self.dungeon.height:
-                        if self.dungeon.map[y][x] == '.':
-                            et = random.choice(enemy_types)
-                            self.enemies.append(
-                                Enemy(x, y, et['symbol'], et['name'],
-                                      et['health'], et['attack'])
-                            )
-                            print(
-                                f"Room: x={room.x}, y={room.y}, width={room.width}, height={room.height}")
-                            print(
-                                f"Map dimensions: {self.dungeon.width}x{self.dungeon.height}")
-                            print(f"Trying to place enemy at: x={x}, y={y}")
-                            break
+            while enemies_placed < self.enemy_count and attempts < max_attempts:
+                # Try to place in a random room (except first room)
+                room = random.choice(self.dungeon.rooms[1:])
+                x = random.randint(room.x + 1, room.x + room.width - 2)
+                y = random.randint(room.y + 1, room.y + room.height - 2)
+
+                # Check if position is empty floor and not occupied by another enemy
+                if self.dungeon.map[y][x] == '.' and not any(e.x == x and e.y == y for e in self.enemies):
+                    # Choose enemy type based on level
+                    if self.level <= 2:
+                        et = enemy_types[2]  # Only Slimes in early levels
+                    elif self.level <= 3:
+                        # Goblins and Slimes in mid levels
+                        et = random.choice(enemy_types[1:])
+                    else:
+                        # All types in higher levels
+                        et = random.choice(enemy_types)
+
+                    self.enemies.append(
+                        Enemy(x, y, et['symbol'], et['name'],
+                              et['health'], et['attack'])
+                    )
+                    enemies_placed += 1
+
+                attempts += 1
 
     def display(self):
         # \033[H moves the cursor to the top-left position and
@@ -135,7 +191,7 @@ class Game:
 
     def input(self):
         move = input(
-            "Move: w - up, s - down, a - left, d - right. f - attack. q - quit\n").lower()
+            "Move: w - up, s - down, a - left, d - right. f - attack. u - use potion. q - quit\n").lower()
         m_x, m_y = 0, 0
 
         if move == 'w':
@@ -170,6 +226,14 @@ class Game:
             self.player.x = new_x
             self.player.y = new_y
 
+            # Check for items at the new position
+            # Create a copy of the list to modify it safely
+            for item in self.items[:]:
+                if item.x == self.player.x and item.y == self.player.y:
+                    self.inventory.append(item)
+                    self.items.remove(item)
+                    print(f"Picked up {item.name}!")
+
         if move in ['w', 'a', 's', 'd']:
             self.enemies_move()
 
@@ -186,7 +250,7 @@ class Game:
             print("\n🎉 You defeated all the enemies! You win!")
             choice = input("Do you want to play again? (y/n): ").lower()
             if choice == 'y':
-                self.__init__()
+                self.__init__(self.level + 1)
                 self.run()
             else:
                 print("Thanks for playing!")
