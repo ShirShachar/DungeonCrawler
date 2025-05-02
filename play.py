@@ -95,9 +95,14 @@ class Game:
     def populate_enemies(self):
         # Define enemy types
         enemy_types = [
-            {'name': 'Goblin', 'symbol': 'G', 'health': 15, 'attack': 3},
-            {'name': 'Orc', 'symbol': 'O', 'health': 30, 'attack': 7},
-            {'name': 'Slime', 'symbol': 'S', 'health': 10, 'attack': 2}
+            {'name': 'Goblin', 'symbol': 'G', 'health': 15,
+                'attack': 3, 'can_shoot': False},
+            {'name': 'Orc', 'symbol': 'O', 'health': 30,
+                'attack': 7, 'can_shoot': False},
+            {'name': 'Slime', 'symbol': 'S', 'health': 10,
+                'attack': 2, 'can_shoot': False},
+            {'name': 'Wizard', 'symbol': 'W', 'health': 20, 'attack': 5,
+                'can_shoot': True}  # Wizard enemy that can shoot
         ]
 
         # Place exactly enemy_count enemies in rooms (skip first room)
@@ -105,7 +110,28 @@ class Game:
             enemies_placed = 0
             max_attempts = 100  # Prevent infinite loop
             attempts = 0
+            wizard_placed = False  # Track if we've placed a wizard already
 
+            # In higher levels (4-5), place exactly one wizard first
+            if self.level >= 4 and not wizard_placed:
+                # Try to place the wizard in a random room (except first room)
+                for _ in range(20):  # Try a few times to place the wizard
+                    room = random.choice(self.dungeon.rooms[1:])
+                    x = random.randint(room.x + 1, room.x + room.width - 2)
+                    y = random.randint(room.y + 1, room.y + room.height - 2)
+
+                    if self.dungeon.map[y][x] == '.':
+                        # Place the wizard
+                        et = enemy_types[3]  # Wizard
+                        self.enemies.append(
+                            Enemy(x, y, et['symbol'], et['name'],
+                                  et['health'], et['attack'], et.get('can_shoot', True))
+                        )
+                        enemies_placed += 1
+                        wizard_placed = True
+                        break
+
+            # Place the rest of the enemies (no more wizards)
             while enemies_placed < self.enemy_count and attempts < max_attempts:
                 # Try to place in a random room (except first room)
                 room = random.choice(self.dungeon.rooms[1:])
@@ -119,14 +145,14 @@ class Game:
                         et = enemy_types[2]  # Only Slimes in early levels
                     elif self.level <= 3:
                         # Goblins and Slimes in mid levels
-                        et = random.choice(enemy_types[1:])
+                        et = random.choice(enemy_types[1:3])
                     else:
-                        # All types in higher levels
-                        et = random.choice(enemy_types)
+                        # For levels 4-5, only regular enemies (not wizards)
+                        et = random.choice(enemy_types[:3])  # Other types
 
                     self.enemies.append(
                         Enemy(x, y, et['symbol'], et['name'],
-                              et['health'], et['attack'])
+                              et['health'], et['attack'], et.get('can_shoot', False))
                     )
                     enemies_placed += 1
 
@@ -166,6 +192,14 @@ class Game:
             pos = (e.x, e.y)
             if pos in occupied:
                 occupied.remove(pos)
+
+            # Check for fireball attack first
+            if e.can_shoot:
+                fireball = e.try_shoot_fireball(
+                    self.player.x, self.player.y, self.dungeon.map)
+                if fireball:
+                    self.player.health -= fireball['damage']
+                    continue  # Skip normal movement/attack if fireball was shot
 
             # If enemy is adjacent to player, attack
             if abs(e.x - self.player.x) + abs(e.y - self.player.y) == 1:
