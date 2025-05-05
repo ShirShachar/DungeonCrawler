@@ -20,9 +20,9 @@ For my final project, I’m building a game called Dungeon Delver, inspired by c
 * Graphical Interface: Visual representation using Pygame with custom graphics
  
 ## Milestones: 
-Milestone 1 - initial code, making sure it is working in the terminal (play.py)
-Milestone 2 - adding a pygame file - play_pygame.py
-Milestone 3 - adding features - emojies, level's difficulity, stronger enemies
+1. Milestone 1 - initial code, making sure it is working in the terminal (play.py)
+2. Milestone 2 - adding a pygame file - play_pygame.py
+3. Milestone 3 - adding features - emojies, level's difficulity, stronger enemies
 
 
 For the revised project description, we will ask you to be more precise and think about how the entire project can be divided up into individual pieces or modules. It's useful to start thinkign about this now.
