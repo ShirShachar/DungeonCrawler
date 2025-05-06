@@ -13,8 +13,8 @@ CELL_SIZE_SCALING = {
     1: 20,
     2: 20,
     3: 15,
-    4: 12,
-    5: 10
+    4: 15,  # Increased from 12 for better visibility
+    5: 14   # Increased from 10 for better visibility
 }
 
 COLOR_BG = (40, 40, 40)        # Dark gray background
@@ -393,7 +393,17 @@ def main():
                     enemy_center = (enemy.x * cell_size + cell_size //
                                     2, enemy.y * cell_size + cell_size // 2)
                     # Make face larger (almost filling the cell)
-                    enemy_radius = int(cell_size * 0.48)
+                    # Increase scaling for levels 4 and 5
+                    scaling_factor = 0.48
+                    if current_level >= 4:
+                        # More moderate scaling that won't cause characters to overlap cells
+                        scaling_factor = 0.65  # Reduced from 0.80 to avoid overlapping
+
+                    # For level 5, reduce further to ensure better proportions
+                    if current_level == 5:
+                        scaling_factor = 0.60
+
+                    enemy_radius = int(cell_size * scaling_factor)
                     pygame.draw.circle(screen, COLOR_WIZARD,
                                        enemy_center, enemy_radius)
 
@@ -445,7 +455,17 @@ def main():
                     enemy_center = (enemy.x * cell_size + cell_size //
                                     2, enemy.y * cell_size + cell_size // 2)
                     # Make face larger (almost filling the cell)
-                    enemy_radius = int(cell_size * 0.48)
+                    # Increase scaling for levels 4 and 5
+                    scaling_factor = 0.48
+                    if current_level >= 4:
+                        # More moderate scaling that won't cause characters to overlap cells
+                        scaling_factor = 0.65  # Reduced from 0.80 to avoid overlapping
+
+                    # For level 5, reduce further to ensure better proportions
+                    if current_level == 5:
+                        scaling_factor = 0.60
+
+                    enemy_radius = int(cell_size * scaling_factor)
                     pygame.draw.circle(screen, COLOR_ENEMY,
                                        enemy_center, enemy_radius)
 
@@ -496,7 +516,19 @@ def main():
             # Draw face background (bright yellow circle)
             face_center = (game.player.x * cell_size + cell_size //
                            2, game.player.y * cell_size + cell_size // 2)
-            face_radius = int(cell_size * 0.48)  # Larger face to fill the cell
+
+            # Larger face for higher levels
+            scaling_factor = 0.48
+            if current_level >= 4:
+                # More moderate scaling that won't cause characters to overlap cells
+                scaling_factor = 0.65  # Reduced from 0.80 to avoid overlapping
+
+            # For level 5, reduce further to ensure better proportions
+            if current_level == 5:
+                scaling_factor = 0.60
+
+            # Larger face to fill the cell
+            face_radius = int(cell_size * scaling_factor)
             pygame.draw.circle(screen, (50, 205, 50),
                                face_center, face_radius)  # Green face using COLOR_PLAYER
 
