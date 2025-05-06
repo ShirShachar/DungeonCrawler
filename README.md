@@ -9,14 +9,14 @@ Stage 2: A 2D visual version is built using Pygame, featuring a grid-based map a
 
 The codebase is modular, with separate classes for the player, enemies, and dungeon grid to support clean design and easy future expansion.
 
-## Features**
+## Features
 1. Randomly generated dungeon layouts
 2. Basic combat system
 3. Item collection and player upgrades
 4. Simple 2D grid-based visual interface (Pygame)
 5. Modular code structure for scalability
 
-**Requirements**
+## Requirements
 Python 3.x
 Pygame
 
