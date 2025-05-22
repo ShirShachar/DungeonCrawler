@@ -1,64 +1,56 @@
-# COMS W2132 Intermediate Computing in Python, Final Project 
-## <Dungeon Delver: A Rogue-lite Dungeon Crawler>
+# Dungeon Delver: A Rogue-lite Dungeon Crawler
 
-### Author:
-- [Shir Shachar](https://github.com/ShirShachar) <ss6814@columbia.edu>
- 
-Replace the author name/email with your information.
+Dungeon Delver is a lightweight rogue-lite dungeon crawler game where players explore procedurally generated dungeons, battle a variety of enemies, and collect powerful items to survive. With both a text-based and a graphical interface built using Pygame, the game offers a classic dungeon-crawling experience with modern Python mechanics.
 
-## Project Description
-Add an initial Project description here. There is no requirement for the length of the proposal. A paragraph or two may be enough -- just to get an idea of what you might want to work on. 
+Developed as a final project for a Python programming course.
 
-For my final project, I’m building a game called Dungeon Delver, inspired by classic rogue-lite dungeon crawlers. The idea is to create a simple top-down dungeon exploration game where the player explores procedurally generated levels, fights off enemies, and collects useful items to survive and get stronger. The game will start off text-based to get the core mechanics right — things like moving around, generating dungeon layouts, and combat. Once that’s working, I plan to build a basic 2D version using Pygame, so there’s a visual interface with a grid-based map and simple character sprites.
+# 🕹️ How to Play
+1. Installation
+Ensure you have Python installed, then install the required library:
+bash
+Copy
+Edit
+pip install pygame
 
-## Key Features:
-* Procedurally Generated Dungeons: Every level has a unique layout with multiple rooms connected by corridors (randomly generated every time)
-* Progressive Difficulty: 5 levels of increasing challenge with different enemies and larger maps
-* Enemy Types: Regular melee enemies and wizards that can shoot fireballs from a distance
-* Item Collection: Find and use health potions throughout the dungeon
-* Interactive Combat: Engage in tactical combat with enemies
-* Graphical Interface: Visual representation using Pygame with custom graphics
- 
-## Milestones: 
-1. Milestone 1 - initial code, making sure it is working in the terminal (play.py)
-2. Milestone 2 - adding a pygame file - play_pygame.py
-3. Milestone 3 - adding features - emojies, level's difficulity, stronger enemies
+2. Run the Game
+You can play in either mode:
+ Text-Based Mode (Terminal):
+ bash
+ Copy
+ Edit
+ python play.py
 
+ Graphical Mode (Pygame):
+ bash
+ Copy
+ Edit
+ python play_pygame.py
 
-For the revised project description, we will ask you to be more precise and think about how the entire project can be divided up into individual pieces or modules. It's useful to start thinkign about this now.
+3. Controls
+Action	Key
+Move	W A S D
+Attack	F
+Use Potion	U
+Quit Game	Q
 
-## Requirements 
-If there are any hardware, software, or online services you think you are going to need, please list them in the Requirements section. This can be tentative for the initial proposal and the teaching staff can help identify resources.
+# 🔑 Key Features
+- Procedurally Generated Dungeons: Each level layout is uniquely generated.
+- Progressive Difficulty: Survive 5 levels with increasingly challenging enemies.
+- Varied Enemy Types: Face off against melee attackers and long-range spellcasting wizards.
+- Item System: Collect and use health potions to stay alive.
+- Interactive Combat: Turn-based battles with positioning and timing.
+- Graphical Interface: Simple 2D visuals using Pygame with grid-based sprites.
 
--> Pygame
+# 🧩 Project Structure
+File	Purpose
+play.py	Core game logic with a text-based interface
+play_pygame.py	Graphical version using Pygame
+entities.py	Definitions for enemies and their behaviors
+dungeon.py	Dungeon layout generation
+items.py	Item logic (e.g. health potions)
 
-## How to play: 
-1. Ensure you have Python installed on your system
-2. Install Pygame:
-   pip install pygame
+# 📦 Requirements
+Python 3.x
+Pygame
 
-3. running the game: 
-You can run the game in two different modes:
- - Text-Based Mode (Terminal)
-    python play.py
-
-- Graphical Mode
-    python play_pygame.py
-
-4. Controls
-Movement: WASD keys (W: up, A: left, S: down, D: right)
-Attack: F key (when adjacent to an enemy)
-Use Potion: U key (if you have health potions in your inventory)
-Quit: Q key
-
-5. Game Structure
-play.py: Core game logic and text-based interface
-play_pygame.py: Pygame implementation with graphical interface
-entities.py: Enemy class definitions including regular enemies and wizards
-dungeon.py: Procedural dungeon generation logic
-items.py: Item class for collectible objects like health potions
-
-
-Have Fun!
-
-
+Have fun exploring the dungeon! 🗝️💥🧟‍♂️
