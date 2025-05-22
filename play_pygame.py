@@ -13,7 +13,7 @@ CELL_SIZE_SCALING = {
     1: 20,
     2: 20,
     3: 15,
-    4: 15,  # Increased from 12 for better visibility
+    4: 14,  # Increased from 12 for better visibility
     5: 14   # Increased from 10 for better visibility
 }
 
